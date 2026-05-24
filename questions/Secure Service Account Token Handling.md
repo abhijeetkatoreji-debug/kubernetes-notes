@@ -171,3 +171,114 @@ kubectl exec -it $POD_NAME -n monitoring -- ls -l /var/run/secrets/kubernetes.io
 2. **ServiceAccount Token Volume Projection:**
 * **URL:** `https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#serviceaccount-token-volume-projection`
 * **Search Keyword:** Type `"projected"` or `"serviceAccountToken"` in the search bar. This provides the exact YAML structure for the `volumeMounts` and `volumes` blocks.
+
+
+----
+
+Here is an exam-style practical question based on your requirement, along with the step-by-step solution and the official Kubernetes documentation URLs.
+
+### **The Question**
+
+**Task:**
+
+1. Create a new namespace named `secure-ns`.
+2. Inside the `secure-ns` namespace, create a ServiceAccount named `app-sa`. Ensure that this ServiceAccount is explicitly configured so it **does not** automatically mount its API token into pods.
+3. Create a Pod named `app-pod` in the `secure-ns` namespace using the `nginx:alpine` image.
+4. The `app-pod` must use the `app-sa` ServiceAccount.
+5. Manually project a ServiceAccount token for `app-sa` into the `app-pod`. The token must be mounted at the path `/var/run/secrets/tokens` with an expiration time of `3600` seconds (1 hour).
+
+---
+
+### **The Solution**
+
+**Step 1: Create the Namespace and ServiceAccount**
+First, create the namespace and generate the basic YAML for the ServiceAccount.
+
+```bash
+kubectl create ns secure-ns
+kubectl create sa app-sa -n secure-ns -o yaml --dry-run=client > app-sa.yaml
+
+```
+
+Edit `app-sa.yaml` to disable automounting by adding `automountServiceAccountToken: false`:
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-sa
+  namespace: secure-ns
+automountServiceAccountToken: false
+
+```
+
+Apply the file:
+
+```bash
+kubectl apply -f app-sa.yaml
+
+```
+
+**Step 2: Create the Pod with the Projected Volume**
+Generate the basic Pod template:
+
+```bash
+kubectl run app-pod --image=nginx:alpine -n secure-ns -o yaml --dry-run=client > app-pod.yaml
+
+```
+
+Edit `app-pod.yaml` to specify the ServiceAccount and configure the projected token volume:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-pod
+  namespace: secure-ns
+spec:
+  serviceAccountName: app-sa
+  containers:
+  - image: nginx:alpine
+    name: app-pod
+    volumeMounts:
+    - mountPath: /var/run/secrets/tokens
+      name: custom-token-vol
+  volumes:
+  - name: custom-token-vol
+    projected:
+      sources:
+      - serviceAccountToken:
+          path: token
+          expirationSeconds: 3600
+
+```
+
+Apply the file:
+
+```bash
+kubectl apply -f app-pod.yaml
+
+```
+
+**Step 3: Verify**
+You can verify the token was correctly projected by checking the contents of the directory inside the running container:
+
+```bash
+kubectl exec -it app-pod -n secure-ns -- ls /var/run/secrets/tokens
+
+```
+
+*You should see a file named `token` inside the directory.*
+
+---
+
+### **Official Documentation URLs (For the Exam)**
+
+During an exam like the CKA or CKS, you can search for the following concepts in the official docs to find exactly what you need to copy/paste:
+
+1. **Opt-out of API credential automounting**
+[https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#opt-out-of-api-credential-automounting](https://www.google.com/search?q=https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/%23opt-out-of-api-credential-automounting)
+*(Search keyword: "automountServiceAccountToken: false")*
+2. **ServiceAccount token volume projection**
+[https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#serviceaccount-token-volume-projection](https://www.google.com/search?q=https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/%23serviceaccount-token-volume-projection)
+*(Search keyword: "serviceAccountToken")*
