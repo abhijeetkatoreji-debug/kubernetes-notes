@@ -1,3 +1,99 @@
+Here is the complete lab setup script to prepare your cluster for this exact scenario.
+
+I have also included a third namespace (`test-ns`) so you can verify that your NetworkPolicies actually block traffic from unauthorized namespaces, which is the best way to prove your solution works.
+
+### **Lab Setup Script**
+
+Run the following commands in your cluster to create the namespaces, labels, and deployments before you apply the NetworkPolicies.
+
+```bash
+# 1. Create the 'prod' namespace and label it
+kubectl create ns prod
+kubectl label ns prod env=prod
+
+# 2. Create the 'data' namespace and label it
+kubectl create ns data
+kubectl label ns data env=data
+
+# 3. Create a 'test-ns' namespace (to prove the policies block non-prod traffic)
+kubectl create ns test-ns
+kubectl label ns test-ns env=test
+
+# 4. Create the target servers (and expose them to test ingress)
+kubectl run prod-server --image=nginx:alpine -n prod --expose --port=80
+kubectl run data-server --image=nginx:alpine -n data --expose --port=80
+
+# 5. Create the client pods (to send traffic)
+kubectl run prod-client --image=nginx:alpine -n prod -- sleep 3600
+kubectl run test-client --image=nginx:alpine -n test-ns -- sleep 3600
+
+# Wait a few seconds for the pods to be in the 'Running' state
+kubectl get pods -A | grep -E 'prod|data|test-ns'
+
+```
+
+---
+
+### **How to verify your work**
+
+A great habit for the exam is to test the traffic flow **before** and **after** you apply the NetworkPolicies.
+
+#### **Phase 1: Test BEFORE applying your solution**
+
+At this stage, Kubernetes allows all traffic by default. Run these commands to verify that everything can communicate:
+
+* **Test 1:** `prod-client` to `data-server` (Should **SUCCEED**)
+```bash
+kubectl exec prod-client -n prod -- curl -s -m 2 data-server.data.svc.cluster.local
+
+```
+
+
+* **Test 2:** `test-client` to `data-server` (Should **SUCCEED**)
+```bash
+kubectl exec test-client -n test-ns -- curl -s -m 2 data-server.data.svc.cluster.local
+
+```
+
+
+* **Test 3:** `test-client` to `prod-server` (Should **SUCCEED**)
+```bash
+kubectl exec test-client -n test-ns -- curl -s -m 2 prod-server.prod.svc.cluster.local
+
+```
+
+
+
+#### **Phase 2: Test AFTER applying your solution**
+
+Once you apply the `deny-policy.yaml` and `allow-from-prod.yaml` from your solution, run the exact same tests. The results should now match the strict security requirements:
+
+* **Test 1:** `prod-client` to `data-server` (Should still **SUCCEED** — allowed by `allow-from-prod`)
+```bash
+kubectl exec prod-client -n prod -- curl -s -m 2 data-server.data.svc.cluster.local
+
+```
+
+
+* **Test 2:** `test-client` to `data-server` (Should **FAIL/TIMEOUT** — blocked by `allow-from-prod`)
+```bash
+kubectl exec test-client -n test-ns -- curl -s -m 2 data-server.data.svc.cluster.local
+
+```
+
+
+* **Test 3:** `test-client` to `prod-server` (Should **FAIL/TIMEOUT** — blocked by `deny-policy` in prod)
+```bash
+kubectl exec test-client -n test-ns -- curl -s -m 2 prod-server.prod.svc.cluster.local
+
+```
+
+
+
+*(Note: The `-m 2` flag tells curl to timeout after 2 seconds, so you don't have to wait forever when a NetworkPolicy is successfully blocking your traffic).*
+
+Would you like a setup script for any of the other security scenarios we've covered today?
+
 Here is the exam-style scenario based on your requirements, complete with the step-by-step solution and the exact Kubernetes documentation URLs you can use during the exam.
 
 ### **The Question**
