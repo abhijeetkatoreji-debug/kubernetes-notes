@@ -50,6 +50,31 @@ sudo sed -i 's/--enable-admission-plugins=NodeRestriction/--enable-admission-plu
 
 ---
 
+---
+This happens because `kubectl` cannot find a valid configuration file (usually located at `~/.kube/config`) to authenticate you with the cluster's API server. Without a config file, it defaults to asking for basic credentials.
+
+If you are on the control plane node of a cluster set up with `kubeadm` (which is standard for CKA/CKS environments), you just need to copy the admin configuration to your user profile.
+
+Here is the quick fix. Run these three commands:
+
+```bash
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+```
+<img width="685" height="227" alt="image" src="https://github.com/user-attachments/assets/69e90773-6f83-485a-9f59-50aa39e08c9c" />
+
+Alternatively, if you just need a temporary fix for your current terminal session, you can export the config path directly:
+
+```bash
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
+```
+
+Once you run either of those, try `kubectl get nodes` again and it should work perfectly!
+---
+
 ### **3. The Solution**
 
 #### **Step 1: Edit the API Server Manifest**
