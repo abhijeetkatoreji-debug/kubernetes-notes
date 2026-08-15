@@ -51,7 +51,7 @@ kubectl get svc -n monitoring
 Then open Grafana:
 
 ```bash
-kubectl port-forward -n monitoring svc/kps-grafana 3000:80
+kubectl port-forward -n monitoring svc/kps-grafana 3000:80 --address 0.0.0.0
 ```
 
 Login: **admin** / **admin123**
@@ -65,7 +65,7 @@ kubectl get pods -n monitoring
 and we’ll verify Prometheus targets + open the first cluster dashboard.
 
 ---
-
+### For NodePort
 Yes — on KodeKloud, `port-forward` to `localhost:3000` usually won’t open in the lab browser. Use **NodePort**.
 
 ```bash
