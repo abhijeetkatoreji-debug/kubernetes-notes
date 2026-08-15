@@ -615,3 +615,17 @@ We installed **kube-prometheus-stack** on K3s, worked around **node-exporter**, 
 ---
 
 Paste your screenshots into every **`[SS: ...]`** slot and this becomes a complete interview/project writeup.
+
+
+Then **Phase 1 is done.**
+
+You’ve covered the full plan:
+
+- kube-prometheus-stack on K8s  
+- cluster/app metrics scraping  
+- ServiceMonitor + targets UP  
+- custom alerts (`PrometheusRule`)  
+- premade Grafana dashboards explored  
+- custom Grafana dashboards from PromQL  
+
+**Where you are now:** ready for **Phase 2** (Docker Compose: sample app → `/metrics` → Prometheus → Grafana), whenever you want to start.
