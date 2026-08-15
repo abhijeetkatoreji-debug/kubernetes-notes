@@ -19,3 +19,5 @@ Here’s where you stand against that plan:
 - Phase 2: Docker Compose + app `/metrics` exposure
 
 **Bottom line:** Stack is installed and mostly healthy. Next real learning step is: get into Grafana → look at cluster metrics → then Prometheus targets.
+
+Next: https://github.com/abhijeetkatoreji-debug/kubernetes-notes/blob/Monitoring/Phase/phase-1.2.md
