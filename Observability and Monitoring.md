@@ -1,3 +1,11 @@
+Checklist
+
+```shell
+kubectl cluster-info; Write-Host "---"; kubectl get nodes -o wide; Write-Host "---"; kubectl get ns; Write-Host "---"; helm version; Write-Host "---"; kubectl get pods -A | Select-String -Pattern "prom|grafana|monitor|kube-system"
+```
+----
+
+
 Got it — **Kubernetes first**, Docker Compose later.
 
 **Plan**
@@ -8,6 +16,52 @@ Got it — **Kubernetes first**, Docker Compose later.
 - **Phase 2 (later):** Docker Compose path — run a sample app locally, expose `/metrics`, scrape with Prometheus, dashboards in Grafana.
 
 When you’re ready, say the word and we’ll start Phase 1 with a simple K8s + Prometheus + Grafana setup.
+
+----
+
+Your cluster is ready: **K3s**, 3 nodes, **Helm** installed, no monitoring yet. Next step is install **kube-prometheus-stack**.
+
+Run these on your `student-node` (bash):
+
+```bash
+# 1) Create namespace
+kubectl create namespace monitoring
+
+# 2) Add Helm repo
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+# 3) Install Prometheus + Grafana + Alertmanager
+helm install kps prometheus-community/kube-prometheus-stack \
+  -n monitoring \
+  --set grafana.adminPassword=admin123 \
+  --set prometheus.prometheusSpec.retention=7d
+
+# 4) Wait until pods are Ready
+kubectl get pods -n monitoring -w
+```
+
+When most pods show `Running` / `Ready`, check services:
+
+```bash
+kubectl get svc -n monitoring
+```
+
+Then open Grafana:
+
+```bash
+kubectl port-forward -n monitoring svc/kps-grafana 3000:80
+```
+
+Login: **admin** / **admin123**
+
+After that, tell me the output of:
+
+```bash
+kubectl get pods -n monitoring
+```
+
+and we’ll verify Prometheus targets + open the first cluster dashboard.
 
 ---
 
