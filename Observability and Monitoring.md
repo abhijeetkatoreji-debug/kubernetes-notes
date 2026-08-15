@@ -71,9 +71,50 @@ kubectl get pods -n monitoring
 ```
 
 and we’ll verify Prometheus targets + open the first cluster dashboard.
-
 ---
-### For NodePort
+Yes — **useful in real life**, but **not required for your first learning loop** on this K3s lab.
+
+## What `kps-prometheus-node-exporter-*` does
+It runs as a **DaemonSet** (one pod per node) and exports **host/machine metrics**:
+- CPU / memory / disk / network of the **node**
+- filesystem usage, load average, etc.
+
+Without it, you still get **Kubernetes object metrics** (pods, deployments, container usage via kubelet/cAdvisor, kube-state-metrics).  
+With it, you also get **node health** (“is this worker out of disk / CPU?”).
+
+## For your learning right now
+**Skip it / leave it disabled** on this KodeKloud K3s lab.  
+You’re blocked by a lab mount issue, and you can still learn:
+- Grafana dashboards  
+- Prometheus targets  
+- ServiceMonitor  
+- alerts  
+
+That’s enough to start.
+
+## Production / DevOps interviews
+**Yes, it comes up**, usually as concepts — not “install this exact pod name”:
+
+- What is node-exporter?
+- Why DaemonSet?
+- Difference: **node metrics** vs **pod/container metrics** vs **kube-state-metrics**
+- How Prometheus scrapes it (ServiceMonitor / annotations)
+- Common alerts: disk full, high node CPU, memory pressure
+
+Typical interview answer in one line:  
+*“Node-exporter gives host-level metrics; kube-state-metrics gives K8s object state; cAdvisor/kubelet give container metrics.”*
+
+## Practical takeaway
+| Piece | Need now? | Interview value |
+|---|---|---|
+| Prometheus + Grafana | Yes | High |
+| kube-state-metrics | Yes (already running) | High |
+| node-exporter | Nice, later | High concept, optional for lab |
+| Sample app scrape | Later | High |
+
+So: **disable it for now, keep going**. Mentally remember what it is for interviews; re-enable on a normal cluster later when mounts work.
+---
+# For NodePort
 Yes — on KodeKloud, `port-forward` to `localhost:3000` usually won’t open in the lab browser. Use **NodePort**.
 
 ```bash
