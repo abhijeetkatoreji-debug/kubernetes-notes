@@ -36,7 +36,9 @@ helm install kps prometheus-community/kube-prometheus-stack \
   -n monitoring \
   --set prometheus-node-exporter.enabled=false \
   --set grafana.adminPassword=admin123 \
-  --set prometheus.prometheusSpec.retention=7d
+  --set prometheus.prometheusSpec.retention=7d \
+  --set prometheus-node-exporter.enabled=false
+
 
 # 4) Wait until pods are Ready
 kubectl get pods -n monitoring -w
