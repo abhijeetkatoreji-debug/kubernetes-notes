@@ -34,6 +34,7 @@ helm repo update
 # 3) Install Prometheus + Grafana + Alertmanager
 helm install kps prometheus-community/kube-prometheus-stack \
   -n monitoring \
+  --set prometheus-node-exporter.enabled=false
   --set grafana.adminPassword=admin123 \
   --set prometheus.prometheusSpec.retention=7d
 
