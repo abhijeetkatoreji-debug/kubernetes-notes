@@ -64,6 +64,9 @@ Notes:
 
 So: NodePort matters only if you hit a **node IP directly**; for the KodeKloud `*-port-*` URL, use `port-forward` on student-node as above. Want the same for Prometheus? Use a different port, e.g. `9090:9090`.
 
+---
+
+Phase 1: https://github.com/abhijeetkatoreji-debug/kubernetes-notes/blob/Monitoring/Phase/phase-1.md
 
 
 ---
