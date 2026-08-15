@@ -42,6 +42,12 @@ helm install kps prometheus-community/kube-prometheus-stack \
 
 # 4) Wait until pods are Ready
 kubectl get pods -n monitoring -w
+
+# if node exporter pod fails to start,
+helm upgrade kps prometheus-community/kube-prometheus-stack \
+  -n monitoring \
+  --reuse-values \
+  --set prometheus-node-exporter.enabled=false
 ```
 
 When most pods show `Running` / `Ready`, check services:
