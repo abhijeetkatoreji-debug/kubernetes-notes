@@ -50,6 +50,27 @@ helm upgrade kps prometheus-community/kube-prometheus-stack \
   --set prometheus-node-exporter.enabled=false
 ```
 
+```bash
+
+# If those exporter pods get crashed
+
+# 1) Confirm what Helm thinks is set
+helm get values kps -n monitoring
+# 2) Disable both related switches explicitly
+helm upgrade kps prometheus-community/kube-prometheus-stack \
+  -n monitoring \
+  --reuse-values \
+  --set prometheus-node-exporter.enabled=false \
+  --set nodeExporter.enabled=false
+# 3) If DaemonSet still exists, delete leftovers
+kubectl delete daemonset -n monitoring -l app.kubernetes.io/name=prometheus-node-exporter --ignore-not-found
+kubectl delete pods -n monitoring -l app.kubernetes.io/name=prometheus-node-exporter --force --grace-period=0 --ignore-not-found
+# 4) Recheck
+kubectl get pods -n monitoring
+kubectl get daemonset -n monitoring
+
+```
+
 When most pods show `Running` / `Ready`, check services:
 
 ```bash
